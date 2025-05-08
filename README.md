@@ -1,0 +1,1 @@
+# Check các rule custom cho từng ngôn ngữ

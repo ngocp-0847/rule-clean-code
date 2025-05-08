@@ -1,0 +1,46 @@
+| Rule ID | Tiêu đề                                                              | Nguyên tắc                       | Công cụ Java hỗ trợ kiểm tra                                                        | Ghi chú |
+| ------- | -------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- | ------- |
+| C003    | Tên biến rõ ràng, không viết tắt tùy tiện                            | Clean Code                       | Checkstyle (LocalVariableName)                                                      |         |
+| C006    | Tên hàm phải là động từ/verb-noun                                    | Clean Code                       | Checkstyle (MethodName)                                                             |         |
+| C007    | Không sử dụng comment mô tả "code làm gì"                            | Clean Code                       | Checkstyle (CommentSize, JavadocStyle)                                              |         |
+| C013    | Không comment code chết (dead code)                                  | Clean Code                       | PMD (UnusedLocalVariable), SpotBugs (Dead store)                                    |         |
+| C014    | Dùng Dependency Injection thay vì new trực tiếp trong logic          | Systems                          | SonarJava (S3306 Spring DI rules), ErrorProne (ConstructorInjection)                |         |
+| C017    | Không gán logic xử lý vào constructor                                | Clean Code, Systems              | SonarJava (ConstructorCallsOverridableMethod)                                       |         |
+| C018    | Không throw generic error, luôn dùng message cụ thể                  | Error Handling                   | PMD (AvoidThrowingRawExceptionTypes) ([PMD][1])                                     |         |
+| C019    | Không sử dụng log mức error cho lỗi không nghiêm trọng               | Error Handling                   | SonarJava (S1125 Literal boolean) / custom PMD                                      |         |
+| C022    | Không duplicate tên biến trong cùng một scope                        | Clean Code                       | Checkstyle (VariableDeclarationUsageDistance)                                       |         |
+| C023    | Các constant không hardcode rải rác trong logic                      | Clean Code, Systems              | Checkstyle (ConstantName), PMD (UseConstant)                                        |         |
+| C027    | Dùng guard clause thay vì nested if                                  | Clean Code                       | SonarJava (S112) / custom PMD                                                       |         |
+| C028    | Mọi catch block phải log nguyên nhân lỗi                             | Error Handling                   | PMD (PreserveStackTrace)                                                            |         |
+| C029    | Dùng custom error class thay vì dùng lỗi hệ thống trực tiếp          | Error Handling                   | PMD (AvoidThrowingRawExceptionTypes)                                                |         |
+| C030    | Logic kiểm tra dữ liệu (validate) phải nằm riêng biệt                | Clean Code, Systems              | SonarJava (S4440) / review thủ công                                                 |         |
+| C032    | Mọi log nên kèm context về environment (dev/stag/prod)               | Emergence, Error Handling        | SonarJava (S3414) / custom plugin                                                   |         |
+| C033    | Không push secret/hardcoded token lên repo                           | Secure Coding                    | SpotBugs + FindSecBugs (HARD\_CODE\_PASSWORD) ([OWASP][2], [Find Security Bugs][3]) |         |
+| C034    | Tách logic xử lý và truy vấn dữ liệu trong service layer             | Systems, Clean Code              | SonarJava (S3749) / custom PMD                                                      |         |
+| C035    | Hạn chế truy cập trực tiếp global state trong logic domain           | Systems                          | ErrorProne (Immutable), SonarJava rules                                             |         |
+| C037    | Hàm xử lý lỗi phải log đầy đủ thông tin đầu vào liên quan            | Error Handling                   | PMD (PreserveStackTrace)                                                            |         |
+| C040    | Tránh logic phụ thuộc thứ tự file/module được gọi                    | Systems                          | Custom review hoặc architectural linter                                             |         |
+| C042    | Không để logic validation nằm rải rác trong nhiều class              | Clean Code                       | Custom review / SonarJava rule                                                      |         |
+| C043    | Không hardcode URL, API key hoặc secret trong mã nguồn               | Secure Coding, Clean Code        | SpotBugs + FindSecBugs (HARD\_CODE\_KEY)                                            |         |
+| C044    | Tên biến boolean nên bắt đầu bằng is, has, should                    | Clean Code                       | Checkstyle (BooleanExpressionComplexity)                                            |         |
+| C045    | Không gọi print hoặc console.log trong production code               | Clean Code                       | PMD (AvoidPrintStackTrace) ([PMD][4])                                               |         |
+| C048    | Không sử dụng regex dài và phức tạp trong logic xử lý chính          | Clean Code                       | PMD (TooComplexRegex) / custom Semgrep                                              |         |
+| C049    | Logic retry không được viết lặp lại nhiều nơi                        | Systems, Emergence               | Custom review / SonarJava (no‑duplicate‑code)                                       |         |
+| C055    | Nếu có logic parse hoặc transform data, phải tách ra khỏi controller | Clean Code                       | SonarJava (S1180)                                                                   |         |
+| C059    | Không xử lý dataset lớn mà không log hoặc kiểm soát tài nguyên       | Performance                      | PMD (TooManyStatements) / custom linter                                             |         |
+| C063    | Không ghi đè hành vi mà bỏ qua logic quan trọng ở superclass         | Robustness, Consistency          | PMD (ConstructorCallsOverridableMethod), ErrorProne                                 |         |
+| C064    | Viết unit test cho logic nghiệp vụ                                   | Testability, Reliability         | JUnit 5 + JaCoCo coverage check                                                     |         |
+| C066    | Không lặp lại logic test giống nhau                                  | DRY, Maintainability             | JUnit + custom test linter                                                          |         |
+| C068    | Mỗi test case chỉ nên kiểm tra một logic                             | Readability, Testability         | JUnit + custom test linter                                                          |         |
+| C069    | Tên test phải phản ánh điều kiện kiểm tra                            | Readability, Self‑documentation  | JUnit naming convention rule                                                        |         |
+| C070    | Tránh hardcode dữ liệu giống nhau trong nhiều test                   | DRY, Maintainability             | JUnit + custom test linter                                                          |         |
+| C071    | Cấu hình không nên được viết cứng trong code                         | Configurability, Maintainability | Spring Boot ConfigurationProperties + SonarJava S3745                               |         |
+| C074    | Test không nên phụ thuộc vào thời gian thực                          | Determinism, Fast Feedback       | JUnit + Mockito Clock control                                                       |         |
+| C075    | Tên test class nên phản ánh module tương ứng                         | Readability, Organization        | JUnit naming convention                                                             |         |
+| C076    | Mỗi test chỉ nên assert một hành vi duy nhất                         | Clarity, Isolation               | JUnit + custom test linter                                                          |         |
+| C077    | Cấu hình bắt buộc phải được kiểm tra hợp lệ khi khởi động            | Fail Fast, Stability             | Spring Boot Config validation + custom startup listener                             |         |
+
+[1]: https://pmd.github.io/pmd/pmd_rules_java.html?utm_source=chatgpt.com "Java Rules | PMD Source Code Analyzer"
+[2]: https://owasp.org/www-community/Free_for_Open_Source_Application_Security_Tools?utm_source=chatgpt.com "Free for Open Source Application Security Tools - OWASP Foundation"
+[3]: https://find-sec-bugs.github.io/bugs.htm?utm_source=chatgpt.com "Bug Pattern: PREDICTABLE_RANDOM - Find Security Bugs"
+[4]: https://pmd.github.io/pmd/pmd_rules_java_bestpractices.html?utm_source=chatgpt.com "Best Practices | PMD Source Code Analyzer"
