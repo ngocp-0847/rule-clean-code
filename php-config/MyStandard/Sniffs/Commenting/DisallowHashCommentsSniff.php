@@ -37,6 +37,14 @@ final class DisallowHashCommentsSniff implements Sniff
             $error = 'Hash comments are prohibited; found %s';
             $data  = [trim($tokens[$stackPtr]['content'])];
             $phpcsFile->addError($error, $stackPtr, 'Found', $data);
+            
+            // Provide a fix suggestion by converting to // style comment
+            $fix = $phpcsFile->addFixableError('Hash comments should be converted to // style', $stackPtr, 'ConvertToSlash', []);
+            if ($fix === true) {
+                $content = $tokens[$stackPtr]['content'];
+                $newContent = '// ' . substr($content, 1);
+                $phpcsFile->fixer->replaceToken($stackPtr, $newContent);
+            }
         }
     }
 }

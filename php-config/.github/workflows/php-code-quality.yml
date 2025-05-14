@@ -1,0 +1,81 @@
+name: PHP Code Quality
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.php'
+      - '.github/workflows/php-code-quality.yml'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.php'
+      - '.github/workflows/php-code-quality.yml'
+
+jobs:
+  phpcs:
+    name: PHP_CodeSniffer
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        tools: composer, phpcs, phpcbf
+        coverage: none
+        
+    - name: Display PHP and tools versions
+      run: |
+        php --version
+        composer --version
+        phpcs --version
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+      
+    - name: Register custom coding standards
+      run: |
+        phpcs --config-set installed_paths ${{ github.workspace }}/php-config
+        phpcs -i
+        
+    - name: Run PHP CodeSniffer
+      run: |
+        phpcs --standard=${{ github.workspace }}/php-config/phpcs.xml --report=checkstyle --report-file=./phpcs-result.xml ./
+      continue-on-error: true
+        
+    - name: Annotate Code Quality Issues
+      uses: staabm/annotate-pull-request-from-checkstyle@v1
+      with:
+        checkstyle-file: ./phpcs-result.xml
+        
+    - name: Upload PHPCS results
+      uses: actions/upload-artifact@v3
+      with:
+        name: phpcs-results
+        path: ./phpcs-result.xml
+
+  syntax-check:
+    name: PHP Syntax Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        coverage: none
+        
+    - name: Check PHP syntax
+      run: |
+        find . -name "*.php" -type f -print0 | xargs -0 -n1 -P4 php -l
+        if [ $? -ne 0 ]; then
+          echo "Syntax errors found!"
+          exit 1
+        fi

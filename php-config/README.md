@@ -60,10 +60,14 @@ You should see `php-config` and `MyStandard` in the list of installed coding sta
 phpcs --standard=php-config /path/to/your/php/files
 ```
 
-### Using the Wrapper Script
+### Using the Wrapper Scripts
 
 ```bash
+# Check coding standards
 ./check-code.sh /path/to/your/php/files
+
+# Fix coding standards violations automatically
+./fix-code.sh /path/to/your/php/files
 ```
 
 ## Current Custom Sniffs
@@ -80,7 +84,39 @@ This sniff prohibits the use of Perl-style hash comments (`# comment`) in PHP co
 
 ## Integration with CI/CD
 
-### GitHub Actions Example
+### Using the Makefile
+
+We provide a Makefile to simplify running PHP_CodeSniffer in development and CI environments:
+
+```bash
+# Check coding standards
+make check
+
+# Automatically fix coding standards violations
+make fix
+
+# Check a specific file or directory
+make check TARGET=path/to/file.php
+
+# Run in CI mode (generates XML report)
+make ci
+
+# Show all available commands
+make help
+```
+
+### Using Git Hooks
+
+We provide a pre-commit hook that automatically checks your PHP files before committing:
+
+```bash
+# Install the Git hooks
+./install-hooks.sh /path/to/your/git/repo
+```
+
+### GitHub Actions
+
+We provide a pre-configured GitHub Actions workflow:
 
 ```yaml
 name: PHP_CodeSniffer
