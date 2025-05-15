@@ -151,6 +151,8 @@ jobs:
 
 ## Laravel Integration
 
+Có thể dùng tools này để fix issue : https://github.com/PHP-CS-Fixer/PHP-CS-Fixer
+
 To integrate with Laravel projects, you can add this to your composer.json:
 
 ```json

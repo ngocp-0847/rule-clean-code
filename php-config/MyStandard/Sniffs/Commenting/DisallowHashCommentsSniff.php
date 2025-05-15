@@ -10,7 +10,6 @@ use PHP_CodeSniffer\Files\File;
  */
 final class DisallowHashCommentsSniff implements Sniff
 {
-
     /**
      * Returns the token types that this sniff is interested in.
      *
@@ -37,7 +36,7 @@ final class DisallowHashCommentsSniff implements Sniff
             $error = 'Hash comments are prohibited; found %s';
             $data  = [trim($tokens[$stackPtr]['content'])];
             $phpcsFile->addError($error, $stackPtr, 'Found', $data);
-            
+
             // Provide a fix suggestion by converting to // style comment
             $fix = $phpcsFile->addFixableError('Hash comments should be converted to // style', $stackPtr, 'ConvertToSlash', []);
             if ($fix === true) {
