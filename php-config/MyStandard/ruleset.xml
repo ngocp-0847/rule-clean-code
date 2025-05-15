@@ -3,4 +3,5 @@
   <description>A custom coding standard.</description>
   <rule ref="MyStandard.Commenting.DisallowHashComments"/>
   <rule ref="MyStandard.Constants.NoHardcodedConstants"/>
+  <rule ref="MyStandard.ErrorHandling.LogErrorsInCatch"/>
 </ruleset>

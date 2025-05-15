@@ -76,6 +76,14 @@ phpcs --standard=php-config /path/to/your/php/files
 
 This sniff prohibits the use of Perl-style hash comments (`# comment`) in PHP code. Use standard PHP comments (`// comment` or `/* comment */`) instead.
 
+### NoHardcodedConstantsSniff
+
+This sniff prohibits hardcoded constants scattered throughout the logic (Rule C023). All constants should be defined in a dedicated constants file or class and referenced by name.
+
+### LogErrorsInCatchSniff
+
+This sniff ensures that all catch blocks log the error cause (Rule C028). Silent catch blocks can hide important error information and make debugging difficult. Proper error handling requires either logging or re-throwing the caught exception.
+
 ## Adding New Sniffs
 
 1. Create a new PHP file in the `MyStandard/Sniffs/` directory, organized by category
