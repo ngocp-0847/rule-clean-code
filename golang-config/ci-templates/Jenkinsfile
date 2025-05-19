@@ -1,0 +1,48 @@
+pipeline {
+    agent {
+        docker {
+            image 'golangci/golangci-lint:v1.55.0'
+        }
+    }
+    
+    stages {
+        stage('Setup') {
+            steps {
+                sh 'go version'
+                sh 'golangci-lint --version'
+                sh 'go install golang.org/x/tools/go/analysis/singlechecker@latest'
+            }
+        }
+        
+        stage('Lint with golangci-lint') {
+            steps {
+                // Sao chép cấu hình từ repo rule-clean-code (điều chỉnh path phù hợp)
+                sh '''
+                cp ${WORKSPACE}/rule-clean-code/golang-config/.golangci.yml .
+                golangci-lint run ./...
+                '''
+            }
+        }
+        
+        stage('Run custom linters') {
+            steps {
+                // Chạy custom linters (điều chỉnh path phù hợp)
+                sh '''
+                bash ${WORKSPACE}/rule-clean-code/golang-config/custom-linters/run-custom-linters.sh .
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Lint succeeded!'
+        }
+        failure {
+            echo 'Lint failed!'
+        }
+    }
+}

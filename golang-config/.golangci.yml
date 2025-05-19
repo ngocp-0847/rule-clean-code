@@ -1,0 +1,111 @@
+# Cấu hình golangci-lint
+# https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  tests: true
+  build-tags:
+    - integration
+
+linters:
+  linters:
+  disable-all: true
+  enable:
+    # Linters mặc định
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    # - structcheck  # Deprecated
+    # - varcheck     # Deprecated (thay thế bằng unused)
+    - ineffassign
+    # - deadcode     # Deprecated (thay thế bằng unused)
+    - typecheck
+    
+    # Linters bổ sung cho quy tắc Clean Code
+    - gocyclo        # Phát hiện code quá phức tạp
+    - gosec          # Kiểm tra lỗi bảo mật
+    - misspell       # Kiểm tra lỗi chính tả
+    - nakedret       # Phát hiện naked returns
+    - prealloc       # Phát hiện các slice có thể được pre-allocated 
+    - stylecheck     # Kiểm tra code style
+    - unconvert      # Phát hiện type conversion không cần thiết
+    - unparam        # Phát hiện tham số không dùng đến
+    - godot          # Kiểm tra các comment kết thúc bằng dấu chấm
+    - gocritic       # Nhiều kiểm tra chất lượng code
+
+linters-settings:
+  gocyclo:
+    # Độ phức tạp cyclomatic tối đa
+    min-complexity: 15
+  
+  govet:
+    # Các kiểm tra bổ sung cho govet
+    enable:
+      - nilness         # Kiểm tra nil pointers
+      - fieldalignment  # Kiểm tra struct field alignment
+      - shadow          # Tìm biến bị shadow
+      - unreachable     # Tìm code không thể được thực thi
+  
+  staticcheck:
+    # Các kiểm tra bổ sung cho staticcheck
+    checks: ["all"]
+
+  stylecheck:
+    # Các quy tắc cho stylecheck
+    checks: ["all"]
+    dot-import-whitelist:
+      - testing
+    initialisms:
+      - API
+      - HTTP
+      - HTTPS
+      - ID
+      - JSON
+      - XML
+      - URL
+      - SQL
+
+  gocritic:
+    # Các quy tắc cho gocritic
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+      - experimental
+      - opinionated
+
+  nakedret:
+    # Giới hạn số dòng code để phát hiện naked returns
+    max-func-lines: 30
+
+issues:
+  # Định nghĩa các quy tắc về cách xử lý issues
+  exclude-rules:
+    # Loại bỏ một số false positive
+    - path: _test\.go
+      linters:
+        - gosec
+    
+    # Bỏ qua docstring trên biến exported trong file test
+    - path: _test\.go
+      text: "exported: exported var"
+      linters:
+        - stylecheck
+
+  # Không bao gồm issues từ các thư mục vendor, generated, etc.
+  exclude-dirs:
+    - vendor
+    - third_party
+    - testdata
+    - examples
+    - generated
+
+  # Số lượng issues tối đa được hiển thị
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  # Nếu cùng một dòng có nhiều issues, chỉ hiển thị issue đầu tiên
+  fix: false

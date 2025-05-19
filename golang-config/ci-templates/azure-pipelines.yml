@@ -1,0 +1,40 @@
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      - develop
+      - feature/*
+      - fix/*
+  paths:
+    include:
+      - '**/*.go'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: GoTool@0
+  inputs:
+    version: '1.21'
+  displayName: 'Cài đặt Go'
+
+- script: |
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.0
+    $(go env GOPATH)/bin/golangci-lint --version
+  displayName: 'Cài đặt golangci-lint'
+
+- script: |
+    go install golang.org/x/tools/go/analysis/singlechecker@latest
+  displayName: 'Cài đặt dependencies cho custom linters'
+
+- script: |
+    # Sao chép cấu hình từ rule-clean-code repo (cần điều chỉnh path)
+    cp $(Build.SourcesDirectory)/rule-clean-code/golang-config/.golangci.yml .
+    $(go env GOPATH)/bin/golangci-lint run ./...
+  displayName: 'Chạy golangci-lint'
+
+- script: |
+    # Chạy custom linters (cần điều chỉnh path)
+    bash $(Build.SourcesDirectory)/rule-clean-code/golang-config/custom-linters/run-custom-linters.sh .
+  displayName: 'Chạy custom linters'

@@ -1,0 +1,42 @@
+version: 2.1
+
+jobs:
+  golang-lint:
+    docker:
+      - image: golangci/golangci-lint:v1.55.0
+    steps:
+      - checkout
+      
+      # Cài đặt các dependencies
+      - run:
+          name: Cài đặt dependencies
+          command: |
+            go install golang.org/x/tools/go/analysis/singlechecker@latest
+      
+      # Chạy golangci-lint
+      - run:
+          name: Chạy golangci-lint
+          command: |
+            # Sao chép cấu hình từ repo clean-code
+            cp /home/circleci/project/rule-clean-code/golang-config/.golangci.yml .
+            golangci-lint run ./...
+      
+      # Chạy custom linters
+      - run:
+          name: Chạy custom linters
+          command: |
+            bash /home/circleci/project/rule-clean-code/golang-config/custom-linters/run-custom-linters.sh .
+
+workflows:
+  version: 2
+  golang-lint:
+    jobs:
+      - golang-lint:
+          filters:
+            branches:
+              only:
+                - main
+                - master
+                - develop
+                - /feature\/.*/
+                - /fix\/.*/

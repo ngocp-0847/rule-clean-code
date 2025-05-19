@@ -1,0 +1,73 @@
+#!/bin/bash
+# Pre-commit hook for Golang projects
+# Đặt file này tại .git/hooks/pre-commit và thực thi chmod +x .git/hooks/pre-commit
+
+# Đường dẫn đến thư mục golang-config
+CONFIG_PATH="/home/phan.ngoc@sun-asterisk.com/Documents/projects/rule-clean-code/golang-config"
+
+# Màu sắc
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# Chỉ kiểm tra các file .go đã được staged
+STAGED_GO_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep "\.go$")
+
+if [[ "$STAGED_GO_FILES" = "" ]]; then
+  echo -e "${YELLOW}Không có file Go nào được staged, bỏ qua kiểm tra.${NC}"
+  exit 0
+fi
+
+echo -e "${YELLOW}Checking Go files:${NC}"
+echo "$STAGED_GO_FILES"
+
+# Chạy golangci-lint trên các file được staged
+echo -e "\n${YELLOW}Running golangci-lint...${NC}"
+golangci-lint run --config "$CONFIG_PATH/.golangci.yml" $(echo "$STAGED_GO_FILES")
+
+# Nếu có lỗi, ngăn commit
+if [ $? -ne 0 ]; then
+  echo -e "\n${RED}❌ golangci-lint failed. Commit bị từ chối.${NC}"
+  echo -e "${YELLOW}Vui lòng sửa các lỗi trên và thử lại.${NC}"
+  exit 1
+fi
+
+# Chạy custom linters
+echo -e "\n${YELLOW}Running custom linters...${NC}"
+cd "$(git rev-parse --show-toplevel)"
+CUSTOM_LINT_RESULT=0
+
+# Lưu các file Go vào một temp file
+TMPFILE=$(mktemp)
+echo "$STAGED_GO_FILES" > "$TMPFILE"
+
+# Các custom linters
+LINTERS=(
+  "$CONFIG_PATH/custom-linters/c044-boolean-naming"
+  # Thêm các linter khác vào đây khi cần
+)
+
+for LINTER in "${LINTERS[@]}"; do
+  LINTER_NAME=$(basename "$LINTER")
+  echo -e "${YELLOW}Running $LINTER_NAME...${NC}"
+  
+  # Duyệt qua từng file và chạy linter
+  while IFS= read -r file; do
+    if ! go run "$LINTER/main.go" "$file"; then
+      CUSTOM_LINT_RESULT=1
+    fi
+  done < "$TMPFILE"
+done
+
+# Xóa temp file
+rm "$TMPFILE"
+
+if [ $CUSTOM_LINT_RESULT -ne 0 ]; then
+  echo -e "\n${RED}❌ Custom linters failed. Commit bị từ chối.${NC}"
+  echo -e "${YELLOW}Vui lòng sửa các lỗi trên và thử lại.${NC}"
+  exit 1
+fi
+
+echo -e "\n${GREEN}✅ Tất cả các kiểm tra đã pass! Đang tiến hành commit...${NC}"
+exit 0

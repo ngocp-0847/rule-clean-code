@@ -1,0 +1,42 @@
+name: Golang Linter
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.go'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - '**.go'
+
+jobs:
+  golangci:
+    name: Lint Golang Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: false
+      
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.55.0
+          args: --timeout=5m
+          working-directory: .
+          only-new-issues: true
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+      
+      - name: Run Custom Linters
+        run: |
+          # Cài đặt các dependency cho custom linters nếu cần
+          go install golang.org/x/tools/go/analysis/singlechecker@latest
+          
+          # Chạy custom linters từ repo
+          git clone https://github.com/yourusername/rule-clean-code.git /tmp/rule-clean-code
+          bash /tmp/rule-clean-code/golang-config/custom-linters/run-custom-linters.sh ${{ github.workspace }}

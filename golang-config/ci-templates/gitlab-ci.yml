@@ -1,0 +1,37 @@
+image: golang:1.21
+
+stages:
+  - lint
+
+variables:
+  GOLANGCI_LINT_VERSION: v1.55.0
+
+before_script:
+  - go version
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin $GOLANGCI_LINT_VERSION
+  - golangci-lint --version
+
+lint:standard:
+  stage: lint
+  script:
+    - golangci-lint run --timeout=5m
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - "**/*.go"
+
+lint:custom:
+  stage: lint
+  script:
+    # Cài đặt dependency cho custom linters
+    - go install golang.org/x/tools/go/analysis/singlechecker@latest
+    
+    # Clone rule-clean-code repo
+    - git clone https://github.com/yourusername/rule-clean-code.git /tmp/rule-clean-code
+    
+    # Chạy custom linters
+    - bash /tmp/rule-clean-code/golang-config/custom-linters/run-custom-linters.sh .
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - "**/*.go"
