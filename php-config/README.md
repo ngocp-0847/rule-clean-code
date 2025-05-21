@@ -42,6 +42,8 @@ source ~/.bashrc
 phpcs --config-set installed_paths /path/to/rule-clean-code/php-config
 ```
 
+/home/phan.ngoc@sun-asterisk.com/Documents/projects/rule-clean-code/php-config/MyStandard
+
 Replace `/path/to/rule-clean-code` with the actual path to your project.
 
 ### Step 5: Verify Installation
@@ -57,17 +59,7 @@ You should see `php-config` and `MyStandard` in the list of installed coding sta
 ### Basic Usage
 
 ```bash
-phpcs --standard=php-config /path/to/your/php/files
-```
-
-### Using the Wrapper Scripts
-
-```bash
-# Check coding standards
-./check-code.sh /path/to/your/php/files
-
-# Fix coding standards violations automatically
-./fix-code.sh /path/to/your/php/files
+phpcs --standard=MyStandard /path/to/your/php/files
 ```
 
 ## Current Custom Sniffs
@@ -105,12 +97,42 @@ make fix
 
 # Check a specific file or directory
 make check TARGET=path/to/file.php
+make check TARGET=path/to/directory/
 
 # Run in CI mode (generates XML report)
 make ci
 
 # Show all available commands
 make help
+```
+
+- Example response run
+```
+phan.ngoc@sun-asterisk.com@B120847-LT:~/Documents/projects/rule-clean-code/php-config$ make check TARGET=/home/phan.ngoc@sun-asterisk.com/Documents/projects/rule-clean-code/php-config/example-app/
+Checking coding standards for: /home/phan.ngoc@sun-asterisk.com/Documents/projects/rule-clean-code/php-config/example-app/ 
+EEEE 4 / 4 (100%)
+
+
+
+FILE: /home/phan.ngoc@sun-asterisk.com/Documents/projects/rule-clean-code/php-config/example-app/test-hash-comments.php
+-----------------------------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+-----------------------------------------------------------------------------------------------------------------------
+ 1 | ERROR | Missing required strict_types declaration (Generic.PHP.RequireStrictTypes.MissingDeclaration)
+-----------------------------------------------------------------------------------------------------------------------
+
+
+FILE: /home/phan.ngoc@sun-asterisk.com/Documents/projects/rule-clean-code/php-config/example-app/test-catch-logging.php
+--------------------------------------------------------------------------------------------------------------------------------
+FOUND 10 ERRORS AFFECTING 9 LINES
+--------------------------------------------------------------------------------------------------------------------------------
+  1 | ERROR | [x] Header blocks must be separated by a single blank line (PSR12.Files.FileHeader.SpacingAfterBlock)
+  1 | ERROR | [ ] Missing required strict_types declaration (Generic.PHP.RequireStrictTypes.MissingDeclaration)
+  5 | ERROR | [x] Opening brace should be on a new line (Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine)
+  9 | ERROR | [ ] Catch block does not log or re-throw the error. Every catch block must log the error cause (Rule C028)
+    |       |     (MyStandard.ErrorHandling.LogErrorsInCatch.NoErrorLogging)
+ 15 | ERROR | [x] Opening brace should be on a new line (Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine)
+ 19 | ERROR | [ ] Catch block does not log or re-throw the error. Every catch block must log the error cause (Rule C028)
 ```
 
 ### Using Git Hooks
@@ -165,7 +187,7 @@ To integrate with Laravel projects, you can add this to your composer.json:
 
 ```json
 "scripts": {
-    "phpcs": "phpcs --standard=php-config app/ tests/"
+    "phpcs": "phpcs --standard=MyStandard app/ tests/"
 }
 ```
 
