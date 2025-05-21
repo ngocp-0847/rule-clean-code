@@ -79,3 +79,42 @@ jobs:
           echo "Syntax errors found!"
           exit 1
         fi
+
+  phpstan:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        tools: composer, phpstan
+        coverage: none
+        
+    - name: Display PHP and PHPStan versions
+      run: |
+        php --version
+        phpstan --version
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+        
+    - name: Run PHPStan
+      run: |
+        phpstan analyse --error-format=checkstyle > ./phpstan-result.xml
+      continue-on-error: true
+        
+    - name: Annotate PHPStan Issues
+      uses: staabm/annotate-pull-request-from-checkstyle@v1
+      with:
+        checkstyle-file: ./phpstan-result.xml
+        
+    - name: Upload PHPStan results
+      uses: actions/upload-artifact@v3
+      with:
+        name: phpstan-results
+        path: ./phpstan-result.xml

@@ -20,11 +20,19 @@ RED = \033[0;31m
 YELLOW = \033[0;33m
 NC = \033[0m # No Color
 
-# Define phony targets (not files)
-.PHONY: all check fix
+# PHPStan executable (defaults to phpstan command in PATH)
+# Usage: make analyse PHPSTAN=/path/to/phpstan
+PHPSTAN_CMD = $(or $(PHPSTAN),phpstan)
 
-# Default target (runs check)
-all: check
+# PHPStan configuration file path (defaults to example-app/phpstan.neon)
+# Usage: make analyse PHPSTAN_CONFIG=/path/to/phpstan.neon
+PHPSTAN_CONFIG_FILE = $(or $(PHPSTAN_CONFIG),$(shell pwd)/phpstan.neon)
+
+# Define phony targets (not files)
+.PHONY: all check fix analyse
+
+# Default target (runs check and analyse)
+all: check analyse
 
 # Check coding standards
 check:
@@ -53,5 +61,16 @@ fix:
 		echo "$(YELLOW)Run 'make check TARGET=$(ACTUAL_TARGET)' to see remaining issues.$(NC)"; \
 	else \
 		echo "$(RED)PHPCBF: An error occurred (exit code $$status).$(NC)"; \
+		exit 1; \
+	fi
+
+# Analyse code with PHPStan
+analyse:
+	@echo "$(YELLOW)Analysing code with PHPStan for: $(ACTUAL_TARGET)$(NC)"
+	@$(PHPSTAN_CMD) analyse --configuration=$(PHPSTAN_CONFIG_FILE) $(ACTUAL_TARGET)
+	@if [ $$? -eq 0 ]; then \
+		echo "$(GREEN)No errors found by PHPStan.$(NC)"; \
+	else \
+		echo "$(RED)PHPStan found code issues.$(NC)"; \
 		exit 1; \
 	fi
