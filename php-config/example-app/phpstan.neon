@@ -1,0 +1,16 @@
+parameters:
+    level: max
+    paths:
+        - src
+        - app
+        - tests
+
+    # Ignore files/folders if needed
+    excludePaths:
+        - tests/Fixtures/*
+        - bootstrap/*
+
+    inferPrivatePropertyTypeFromConstructor: true
+
+includes:
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon

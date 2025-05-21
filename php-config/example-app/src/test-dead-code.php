@@ -12,6 +12,9 @@ class DeadCodeExample
         $b = 20;
         $result = $a + $b;
         
+        return $a;
+
+        $d = $a + 5;
         // This is a normal comment
         return $result;
     }
